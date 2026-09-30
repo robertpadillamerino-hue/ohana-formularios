@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>CSA — Registro de Combustible</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#252E50;--teal:#00B3B0;--bg:#f0f4f8;--white:#fff;
+  --green:#10b981;--yellow:#f59e0b;--red:#ef4444;--muted:#6b7280;
+  --border:#e2e8f0;--radius:14px;--shadow:0 2px 12px rgba(0,0,0,.10);
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:#1a202c;min-height:100vh}
+
+/* HEADER */
+header{background:var(--navy);padding:16px 20px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:50;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.logo-icon{width:40px;height:40px;background:var(--teal);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.logo-text{color:#fff}
+.logo-text .brand{font-size:15px;font-weight:700;letter-spacing:.08em}
+.logo-text .brand span{color:var(--teal)}
+.logo-text .sub{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.06em}
+.badge{margin-left:auto;background:rgba(0,179,176,.2);color:var(--teal);font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;white-space:nowrap}
+
+/* CONTENEDOR */
+.container{max-width:640px;margin:0 auto;padding:20px 16px 40px}
+
+/* CARDS */
+.card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden}
+.card-header{background:var(--navy);color:#fff;padding:14px 18px;font-size:13px;font-weight:700;letter-spacing:.04em;display:flex;align-items:center;gap:8px}
+.card-header .icon{font-size:16px}
+.card-body{padding:18px}
+
+/* CAMPOS */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.field .req{color:var(--red)}
+.field input,.field select,.field textarea{
+  width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:9px;
+  font-size:15px;font-family:inherit;outline:none;transition:border-color .2s;background:#fff
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--teal)}
+.field input[readonly]{background:#f8fafc;color:var(--muted)}
+.field textarea{resize:vertical;min-height:70px}
+.field.invalid input,.field.invalid select{border-color:var(--red)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:400px){.row2{grid-template-columns:1fr}}
+
+/* BOTONES */
+.btn-group{display:flex;flex-direction:column;gap:10px}
+.btn{width:100%;padding:15px 18px;border:none;border-radius:11px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-guardar{background:var(--green);color:#fff}
+.btn-guardar:hover{background:#0ea271}
+.btn-guardar:disabled{background:#9ca3af;cursor:not-allowed}
+.btn-whatsapp{background:#25d366;color:#fff}
+.btn-whatsapp:hover{background:#20b858}
+.btn-secondary{background:var(--white);color:var(--navy);border:1.5px solid var(--border)}
+.btn:active{transform:scale(.98)}
+
+/* STATUS */
+.status{display:none;padding:14px 16px;border-radius:11px;font-size:14px;font-weight:600;margin-bottom:14px;align-items:center;gap:8px}
+.status.show{display:flex}
+.status.ok{background:#d1fae5;color:#065f46}
+.status.err{background:#fee2e2;color:#991b1b}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-icon">⛽</div>
+  <div class="logo-text">
+    <div class="brand">CANCUN <span>SEA ADVENTURES</span></div>
+    <div class="sub">Registro de Combustible</div>
+  </div>
+  <div class="badge" id="badge-fecha">—</div>
+</header>
+
+<div class="container">
+
+  <div id="status" class="status"></div>
+
+  <!-- DATOS GENERALES -->
+  <div class="card">
+    <div class="card-header"><span class="icon">📋</span> Datos generales</div>
+    <div class="card-body">
+      <div class="row2">
+        <div class="field">
+          <label>Fecha</label>
+          <input type="date" id="f-fecha"/>
+        </div>
+        <div class="field">
+          <label>Hora Final</label>
+          <input type="time" id="f-hora"/>
+        </div>
+      </div>
+      <div class="field" id="wrap-unidad">
+        <label>Unidad <span class="req">*</span></label>
+        <select id="f-unidad">
+          <option value="">— Selecciona la unidad —</option>
+          <option value="6610|NU2|99RC4Z NISSAN URVAN 2022 BLANCO">NU2 — NISSAN URVAN 2022 (6610)</option>
+          <option value="6611|TH1|98RC4Z TOYOTA HIACE 2022 BLANCO">TH1 — TOYOTA HIACE 2022 (6611)</option>
+          <option value="6612|RMP8|RP-03 RAM PRO MASTER 2018 BLANCO">RMP8 — RAM PRO MASTER 2018 (6612)</option>
+          <option value="6910|FC3|50RD3T FORD CUSTOM 2019 BLANCO">FC3 — FORD CUSTOM 2019 (6910)</option>
+          <option value="7004|JS4|78RD9X JAC SUNRAY 2024 BLANCO">JS4 — JAC SUNRAY 2024 (7004)</option>
+          <option value="7073|FT5|47RE1D FORD TRANSIT 2024 BLANCO">FT5 — FORD TRANSIT 2024 (7073)</option>
+          <option value="7106|NU6|44-RD-4K NISSAN URVAN 2022 BLANCO">NU6 — NISSAN URVAN 2022 (7106)</option>
+          <option value="7226|FT7|15RE4E FORD TRANSIT 2025 BLANCO">FT7 — FORD TRANSIT 2025 (7226)</option>
+          <option value="7288|FT8|92RE5U FORD TRANSIT 2 2025 BLANCA">FT8 — FORD TRANSIT 2 2025 (7288)</option>
+          <option value="7337|FT9|FT9 FORD TRANSIT 2026 BLANCO">FT9 — FORD TRANSIT 2026 (7337)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Conductor</label>
+        <select id="f-conductor">
+          <option value="">— Selecciona el conductor —</option>
+          <option>ABEL MORALES</option>
+          <option>ANDRES RINCON</option>
+          <option>CARLOS DOMINGUEZ</option>
+          <option>CARLOS PEREZ</option>
+          <option>DAMIAN ALVAREZ</option>
+          <option>JAVIER HERNANDEZ</option>
+          <option>NELSON CHAN</option>
+          <option>NESTOR REYES</option>
+          <option>OSCAR VAZQUEZ</option>
+          <option>ROBERTO GURROLA</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMBUSTIBLE -->
+  <div class="card">
+    <div class="card-header"><span class="icon">🛢️</span> Combustible</div>
+    <div class="card-body">
+      <div class="field" id="wrap-producto">
+        <label>Producto <span class="req">*</span></label>
+        <select id="f-producto">
+          <option value="">— Selecciona el producto —</option>
+          <option>MAGNA</option>
+          <option>PREMIUM</option>
+          <option>DIESEL</option>
+          <option>UREA</option>
+          <option>OTROS PRODUCTOS</option>
+        </select>
+      </div>
+      <div class="row2">
+        <div class="field" id="wrap-cantidad">
+          <label>Cantidad (litros) <span class="req">*</span></label>
+          <input type="number" id="f-cantidad" step="0.001" min="0" placeholder="0.000"/>
+        </div>
+        <div class="field" id="wrap-monto">
+          <label>Monto ($) <span class="req">*</span></label>
+          <input type="number" id="f-monto" step="0.01" min="0" placeholder="0.00"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KILOMETRAJE -->
+  <div class="card">
+    <div class="card-header"><span class="icon">🛣️</span> Kilometraje</div>
+    <div class="card-body">
+      <div class="row2">
+        <div class="field">
+          <label>Km Inicial</label>
+          <input type="number" id="f-kmini" min="0" placeholder="0"/>
+        </div>
+        <div class="field">
+          <label>Km Final</label>
+          <input type="number" id="f-kmfin" min="0" placeholder="0"/>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Km Recorridos</label>
+          <input type="text" id="f-kmrec" readonly placeholder="auto"/>
+        </div>
+        <div class="field">
+          <label>Rendimiento km/L</label>
+          <input type="text" id="f-rend" readonly placeholder="auto"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACCIONES -->
+  <div class="btn-group">
+    <button class="btn btn-guardar" id="btn-guardar" onclick="guardarRegistro()">
+      💾 Guardar registro
+    </button>
+    <button class="btn btn-whatsapp" onclick="shareWhatsApp()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Aviso por WhatsApp (opcional)
+    </button>
+    <button class="btn btn-secondary" onclick="limpiarForm()">
+      🔄 Limpiar
+    </button>
+  </div>
+
+</div>
+
+<script>
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+// Pega aquí la URL de tu Web App de Google Apps Script (ver instrucciones).
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwPDJVXKR_Dg6pqO0daeS5ZZ9BLVtW-UkqqZNmhzwJBcYuCjoUtG4YsJOVt55u5Nw7L/exec';
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded', () => {
+  setDefaultDate();
+});
+
+function setDefaultDate() {
+  const today = new Date();
+  document.getElementById('f-fecha').value = today.toISOString().slice(0,10);
+  const hh = String(today.getHours()).padStart(2,'0');
+  const mm = String(today.getMinutes()).padStart(2,'0');
+  document.getElementById('f-hora').value = `${hh}:${mm}`;
+  document.getElementById('badge-fecha').textContent = today.toLocaleDateString('es-MX',{day:'numeric',month:'short'});
+}
+
+// ── Arma los datos del formulario en un solo objeto ──
+function datosFormulario() {
+  const unidadVal  = document.getElementById('f-unidad').value   || '';
+  const conductor  = document.getElementById('f-conductor').value || 'No especificado';
+  const fecha      = document.getElementById('f-fecha').value    || '';
+  const hora       = document.getElementById('f-hora').value     || '';
+  const producto   = document.getElementById('f-producto').value || '';
+  const cantidad   = document.getElementById('f-cantidad').value || '';
+  const monto      = document.getElementById('f-monto').value    || '';
+  const kmIni      = parseFloat(document.getElementById('f-kmini').value) || 0;
+  const kmFin      = parseFloat(document.getElementById('f-kmfin').value) || 0;
+
+  const partes      = unidadVal.split('|');
+  const vehiculo    = partes[0] || '';
+  const unidad      = partes[1] || '';
+  const descripcion = partes[2] || '';
+
+  const kmRec = kmFin > kmIni ? kmFin - kmIni : 0;
+  const lit   = parseFloat(cantidad) || 0;
+  const rend  = (lit > 0 && kmRec > 0) ? (kmRec / lit).toFixed(2) : '0';
+
+  document.getElementById('f-kmrec').value = kmRec;
+  document.getElementById('f-rend').value  = rend;
+
+  const fp = fecha ? fecha.split('-') : ['','',''];
+  const fechaFmt = fecha ? (fp[2] + '/' + fp[1] + '/' + fp[0]) : '';
+  const mes = fecha ? (MESES[parseInt(fp[1],10)-1] || '') : '';
+  const nota = `CSA-${fp[0]}${fp[1]}${fp[2]}-${hora.replace(':','')}`;
+
+  return {
+    hoja: 'combustible', nota, vehiculo, unidad, descripcion,
+    fechaPickup: fechaFmt, horaFinal: hora, producto, cantidad, monto,
+    kmFinal: kmFin, rendimiento: rend, kmInicial: kmIni, kmRecorridos: kmRec,
+    conductor, mes, empresa: 'CANCUN SEA ADVENTURES'
+  };
+}
+
+// ── Valida los campos obligatorios, marca en rojo los que falten ──
+function validar(d) {
+  const faltantes = [];
+  const marcar = (id, wrapId, val) => {
+    const wrap = document.getElementById(wrapId);
+    if (!val) { wrap.classList.add('invalid'); faltantes.push(id); }
+    else wrap.classList.remove('invalid');
+  };
+  marcar('unidad', 'wrap-unidad', d.unidad);
+  marcar('producto', 'wrap-producto', d.producto);
+  marcar('cantidad', 'wrap-cantidad', d.cantidad);
+  marcar('monto', 'wrap-monto', d.monto);
+  return faltantes;
+}
+
+function mostrarStatus(tipo, msg) {
+  const el = document.getElementById('status');
+  el.className = 'status show ' + tipo;
+  el.textContent = msg;
+}
+
+// ── GUARDAR (envío silencioso a Google Sheets) ──
+async function guardarRegistro() {
+  const d = datosFormulario();
+  const faltantes = validar(d);
+  if (faltantes.length) {
+    mostrarStatus('err', '⚠️ Falta: ' + faltantes.join(', '));
+    return;
+  }
+  if (SHEETS_URL.indexOf('PON_AQUI') === 0) {
+    mostrarStatus('err', '⚠️ Falta configurar la URL de Google Sheets en el código.');
+    return;
+  }
+  const btn = document.getElementById('btn-guardar');
+  btn.disabled = true;
+  btn.textContent = 'Guardando…';
+  try {
+    // mode:'no-cors' evita el preflight que Apps Script no responde bien;
+    // a cambio no podemos leer si el servidor realmente lo guardó, solo
+    // que la petición salió. Por eso el botón de WhatsApp queda como respaldo.
+    await fetch(SHEETS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify(d)
+    });
+    mostrarStatus('ok', '✅ Registro guardado: ' + d.unidad + ' — ' + d.cantidad + ' L');
+    setTimeout(() => { limpiarForm(); }, 1200);
+  } catch (err) {
+    mostrarStatus('err', '❌ No se pudo guardar (sin conexión). Intenta de nuevo o usa el aviso por WhatsApp.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '💾 Guardar registro';
+  }
+}
+
+// ── WHATSAPP (respaldo/aviso manual) ──
+function shareWhatsApp() {
+  const d = datosFormulario();
+  const msg = `[COMBUSTIBLE-CSA]
+Nota: ${d.nota}
+Vehiculo: ${d.vehiculo}
+Unidad: ${d.unidad}
+Descripcion: ${d.descripcion}
+Fecha de Pickup: ${d.fechaPickup}
+Hora Final: ${d.horaFinal}
+Producto: ${d.producto}
+Cantidad: ${d.cantidad}
+Monto: ${d.monto}
+Km Inicial: ${d.kmInicial}
+Km Final: ${d.kmFinal}
+Km Recorridos: ${d.kmRecorridos}
+Rendimiento: ${d.rendimiento}
+Conductor: ${d.conductor}
+Mes: ${d.mes}
+Empresa: ${d.empresa}`;
+
+  const url = 'https://wa.me/?text=' + encodeURIComponent(msg);
+  window.open(url, '_blank');
+}
+
+// ── LIMPIAR ──
+function limpiarForm() {
+  document.getElementById('f-unidad').value    = '';
+  document.getElementById('f-conductor').value = '';
+  document.getElementById('f-producto').value  = '';
+  document.getElementById('f-cantidad').value  = '';
+  document.getElementById('f-monto').value     = '';
+  document.getElementById('f-kmini').value     = '';
+  document.getElementById('f-kmfin').value     = '';
+  document.getElementById('f-kmrec').value     = '';
+  document.getElementById('f-rend').value      = '';
+  document.getElementById('status').className  = 'status';
+  ['wrap-unidad','wrap-producto','wrap-cantidad','wrap-monto'].forEach(id=>document.getElementById(id).classList.remove('invalid'));
+  setDefaultDate();
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
