@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>Ohana — Inspección de unidades</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#252E50;--teal:#00B3B0;--bg:#f0f4f8;--white:#fff;
+  --green:#10b981;--yellow:#f59e0b;--red:#ef4444;--muted:#6b7280;
+  --border:#e2e8f0;--radius:14px;--shadow:0 2px 12px rgba(0,0,0,.10);
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:#1a202c;min-height:100vh}
+header{background:var(--navy);padding:16px 20px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:50;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.logo-icon{width:40px;height:40px;background:var(--teal);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.logo-text{color:#fff}
+.logo-text .brand{font-size:15px;font-weight:700;letter-spacing:.08em}
+.logo-text .brand span{color:var(--teal)}
+.logo-text .sub{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.06em}
+.badge{margin-left:auto;background:rgba(0,179,176,.2);color:var(--teal);font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;white-space:nowrap}
+.container{max-width:640px;margin:0 auto;padding:20px 16px 40px}
+.card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden}
+.card-header{background:var(--navy);color:#fff;padding:14px 18px;font-size:13px;font-weight:700;letter-spacing:.04em;display:flex;align-items:center;gap:8px}
+.card-header .cnt{margin-left:auto;font-weight:600;opacity:.75;font-size:12px}
+.card-body{padding:14px 18px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.field .req{color:var(--red)}
+.field input,.field select,.field textarea{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:9px;font-size:15px;font-family:inherit;outline:none;background:#fff}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--teal)}
+.field textarea{resize:vertical;min-height:70px}
+.field.invalid input,.field.invalid select{border-color:var(--red)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.item{padding:11px 0;border-bottom:1px solid var(--border)}
+.item:last-child{border-bottom:none}
+.item.invalid .nom{color:var(--red)}
+.nom{font-size:14.5px;font-weight:600;margin-bottom:8px}
+.ops{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.ops.dos{grid-template-columns:repeat(2,1fr)}
+.op{padding:10px 4px;border:1.5px solid var(--border);border-radius:9px;background:#fff;font:inherit;font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer}
+.op.on.ok{background:var(--green);border-color:var(--green);color:#fff}
+.op.on.falta{background:var(--red);border-color:var(--red);color:#fff}
+.op.on.na{background:var(--muted);border-color:var(--muted);color:#fff}
+.btn-group{display:flex;flex-direction:column;gap:10px}
+.btn{width:100%;padding:15px 18px;border:none;border-radius:11px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-guardar{background:var(--green);color:#fff}
+.btn-guardar:disabled{background:#9ca3af;cursor:not-allowed}
+.btn-whatsapp{background:#25d366;color:#fff}
+.btn-secondary{background:var(--white);color:var(--navy);border:1.5px solid var(--border)}
+.btn-mini{width:auto;padding:9px 14px;font-size:13px;margin-bottom:6px}
+.btn:active{transform:scale(.98)}
+.status{display:none;padding:14px 16px;border-radius:11px;font-size:14px;font-weight:600;margin-bottom:14px}
+.status.show{display:block}
+.status.ok{background:#d1fae5;color:#065f46}
+.status.err{background:#fee2e2;color:#991b1b}
+.resumen{font-size:13px;color:var(--muted);margin:-4px 0 14px;text-align:center}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-icon">🔍</div>
+  <div class="logo-text">
+    <div class="brand">OHANA <span>TRANSFERS</span></div>
+    <div class="sub">Inspección de unidades</div>
+  </div>
+  <div class="badge" id="badge-fecha">—</div>
+</header>
+
+<div class="container">
+  <div id="status" class="status"></div>
+
+  <div class="card">
+    <div class="card-header">📋 Datos generales</div>
+    <div class="card-body">
+      <div class="row2">
+        <div class="field"><label>Fecha</label><input type="date" id="f-fecha"/></div>
+        <div class="field"><label>Hora</label><input type="time" id="f-hora"/></div>
+      </div>
+      <div class="field" id="wrap-unidad">
+        <label>Unidad <span class="req">*</span></label>
+        <select id="f-unidad"></select>
+      </div>
+      <div class="field" id="wrap-inspector">
+        <label>Quién inspecciona <span class="req">*</span></label>
+        <select id="f-inspector"></select>
+      </div>
+      <div class="field" id="wrap-operador">
+        <label>Operador <span class="req">*</span></label>
+        <select id="f-operador"></select>
+      </div>
+    </div>
+  </div>
+
+  <div id="grupos"></div>
+
+  <div class="card">
+    <div class="card-header">📝 Observaciones</div>
+    <div class="card-body">
+      <div class="field" style="margin:0"><textarea id="f-obs" placeholder="Opcional: qué falta exactamente, cantidades, estado de algo…"></textarea></div>
+    </div>
+  </div>
+
+  <div class="resumen" id="resumen"></div>
+  <div class="btn-group">
+    <button class="btn btn-guardar" id="btn-guardar" onclick="guardarRegistro()">💾 Guardar inspección</button>
+    <button class="btn btn-whatsapp" onclick="shareWhatsApp()">Aviso por WhatsApp (opcional)</button>
+    <button class="btn btn-secondary" onclick="limpiarForm()">🔄 Limpiar</button>
+  </div>
+</div>
+
+<script>
+// URL de la Web App de Apps Script de la hoja "Inspección de unidades Ohana".
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxJI5j1aoRUIlTExj5P1DG22kJp6rnoPzuElnmDalcerKH1VMZ5AzKIiSafZBO8tJaVlw/exec';
+
+// Unidades activas (clave igual que en el Tablero del Rey Pakal). NU2 está vendida.
+const UNIDADES = [
+  ['TH1','Toyota Hiace 2022'], ['RMP8','RAM Pro Master 2018'], ['FC3','Ford Custom 2019'],
+  ['JS4','JAC Sunray 2024'], ['FT5','Ford Transit 2024'], ['NU6','Nissan Urvan 2022'],
+  ['FT7','Ford Transit 2025'], ['FT8','Ford Transit 2 2025'], ['FT9','Ford Transit 2026'],
+];
+// Opciones de "Quién inspecciona". Edítalas aquí.
+const INSPECTORES = ['INSPECCIÓN INTERNA','INSPECCIÓN EXTERNA'];
+// Operadores activos en el Tablero del Rey Pakal (17-nov-2026). Edítalos aquí cuando entre o salga alguien.
+const OPERADORES = ['CARLOS DOMINGUEZ','CARLOS PEREZ','HUGO MICHEL TREJO','JOSE JUAN ALVARADO','JUAN MANUEL LUGO HERNANDEZ',
+  'LUIS MIGUEL GARCES GUZMAN','OMAR PEREZ','OSCAR VAZQUEZ'];
+
+// El nombre de cada concepto es también el encabezado de su columna en la hoja: no cambiarlos.
+const GRUPOS = [
+  {t:'📄 Papelería', items:['Formatos No Show Ohana','Formatos No Show CSA','Papeletas de incidencias','Tabla','Marcador de agua','Plumas']},
+  {t:'🧰 Equipo y herramientas', items:['Hielera','Llanta de refaccion','Gato','Llave de cruz','Senalamientos','Cables pasacorriente','Botiquin','Banner','Trapos de limpieza']},
+  // Presentación: se califica uno por uno (sin "No aplica" ni "marcar todo").
+  {t:'✨ Presentación', pres:true, items:['Interior','Exterior','Sin tiperos ni objetos','Operador']},
+];
+const OPS_PRES = {'Interior':[['ok','Presentable'],['falta','No presentable']], 'Exterior':[['ok','Presentable'],['falta','No presentable']],
+  'Sin tiperos ni objetos':[['ok','Cumple'],['falta','No cumple']], 'Operador':[['ok','Presentable'],['falta','No presentable']]};
+function opsDe(i){ return OPS_PRES[i] || OPS; }
+const ETIQ = {'Llanta de refaccion':'Llanta de refacción','Senalamientos':'Señalamientos','Botiquin':'Botiquín','Sin tiperos ni objetos':'Sin tiperos ni objetos en la unidad'};
+const OPS = [['ok','Completo'],['falta','Falta'],['na','No aplica']];
+const TODOS = GRUPOS.flatMap(g=>g.items);
+const PRES = GRUPOS.filter(g=>g.pres).flatMap(g=>g.items);
+const FIS = TODOS.filter(i=>!PRES.includes(i));
+let estado = {};
+let enviando = false;
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('f-unidad').innerHTML = '<option value="">— Selecciona la unidad —</option>' +
+    UNIDADES.map(([c,d])=>`<option value="${c}">${c} — ${d}</option>`).join('');
+  document.getElementById('f-inspector').innerHTML = '<option value="">— Selecciona el tipo de inspección —</option>' +
+    INSPECTORES.map(n=>`<option>${n}</option>`).join('');
+  document.getElementById('f-operador').innerHTML = '<option value="">— Selecciona el operador —</option>' +
+    OPERADORES.map(n=>`<option>${n}</option>`).join('');
+  pintar();
+  setDefaultDate();
+});
+
+function setDefaultDate(){
+  const t = new Date();
+  const p = n=>String(n).padStart(2,'0');
+  document.getElementById('f-fecha').value = `${t.getFullYear()}-${p(t.getMonth()+1)}-${p(t.getDate())}`;
+  document.getElementById('f-hora').value = `${p(t.getHours())}:${p(t.getMinutes())}`;
+  document.getElementById('badge-fecha').textContent = t.toLocaleDateString('es-MX',{day:'numeric',month:'short'});
+}
+
+function pintar(){
+  document.getElementById('grupos').innerHTML = GRUPOS.map((g,gi)=>{
+    const marc = g.items.filter(i=>estado[i]).length;
+    return `<div class="card"><div class="card-header">${g.t}<span class="cnt">${marc} de ${g.items.length}</span></div><div class="card-body">
+      ${g.pres?'':`<button class="btn btn-secondary btn-mini" onclick="todoCompleto(${gi})">✓ Marcar lo pendiente como completo</button>`}
+      ${g.items.map(i=>`<div class="item" id="it-${i.replace(/\W/g,'')}"><div class="nom">${ETIQ[i]||i}</div><div class="ops ${opsDe(i).length===2?'dos':''}">${
+        opsDe(i).map(([k,l])=>`<button type="button" class="op ${k} ${estado[i]===k?'on':''}" onclick="marcar('${i}','${k}')">${l}</button>`).join('')
+      }</div></div>`).join('')}
+    </div></div>`;
+  }).join('');
+  const f = FIS.filter(i=>estado[i]==='falta').length, np = PRES.filter(i=>estado[i]==='falta').length;
+  const m = TODOS.filter(i=>estado[i]).length;
+  document.getElementById('resumen').textContent = `${m} de ${TODOS.length} marcados` + (f?` · ${f} faltan`:'') + (np?` · presentación: ${np} mal`:'');
+}
+function marcar(i,k){ estado[i] = k; pintar(); }
+function todoCompleto(gi){ GRUPOS[gi].items.forEach(i=>{ if(!estado[i]) estado[i]='ok'; }); pintar(); }
+
+function datos(){
+  const fecha = document.getElementById('f-fecha').value || '';
+  const hora = document.getElementById('f-hora').value || '';
+  const unidad = document.getElementById('f-unidad').value || '';
+  const inspector = document.getElementById('f-inspector').value || '';
+  const operador = document.getElementById('f-operador').value || '';
+  const items = {};
+  TODOS.forEach(i=>{ const k = estado[i]; items[i] = k ? opsDe(i).find(o=>o[0]===k)[1] : ''; });
+  const folio = `INSP-${fecha.replace(/-/g,'')}-${hora.replace(':','')}-${unidad}`;
+  return {hoja:'inspeccion', folio, fecha, hora, unidad, inspector, operador, items,
+          observaciones: document.getElementById('f-obs').value.trim()};
+}
+
+function validar(d){
+  const falt = [];
+  [['wrap-unidad',d.unidad,'unidad'],['wrap-inspector',d.inspector,'quién inspecciona'],['wrap-operador',d.operador,'operador']].forEach(([w,v,n])=>{
+    document.getElementById(w).classList.toggle('invalid', !v); if(!v) falt.push(n);
+  });
+  const sin = TODOS.filter(i=>!estado[i]);
+  TODOS.forEach(i=>document.getElementById('it-'+i.replace(/\W/g,'')).classList.toggle('invalid', !estado[i]));
+  if(sin.length) falt.push(sin.length+' concepto'+(sin.length===1?'':'s')+' sin marcar');
+  if(!d.fecha || !d.hora) falt.push('fecha y hora');
+  return falt;
+}
+
+function status(tipo,msg){ const el=document.getElementById('status'); el.className='status show '+tipo; el.textContent=msg; window.scrollTo(0,0); }
+
+async function guardarRegistro(){
+  if(enviando) return;
+  const d = datos();
+  const f = validar(d);
+  if(f.length){ status('err','⚠️ Falta: '+f.join(', ')); return; }
+  if(SHEETS_URL.indexOf('PON_AQUI')===0){ status('err','⚠️ Falta configurar la URL de Google Sheets en el código.'); return; }
+  enviando = true;
+  const btn = document.getElementById('btn-guardar');
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  try{
+    // no-cors: Apps Script no responde bien al preflight. No se puede leer la respuesta;
+    // si se reenvía, la hoja descarta el folio repetido.
+    await fetch(SHEETS_URL, {method:'POST', mode:'no-cors', body:JSON.stringify(d)});
+    const falt = FIS.filter(i=>estado[i]==='falta').length, np = PRES.filter(i=>estado[i]==='falta').length;
+    status('ok', `✅ Inspección guardada: ${d.unidad}` + (falt?` — ${falt} faltante${falt===1?'':'s'}`:' — equipo completo') + (np?` · presentación: ${np} mal`:''));
+    setTimeout(()=>limpiarForm(true), 1500);
+  }catch(e){
+    status('err','❌ No se pudo guardar (sin conexión). Intenta de nuevo o usa el aviso por WhatsApp.');
+  }finally{
+    enviando = false; btn.disabled = false; btn.textContent = '💾 Guardar inspección';
+  }
+}
+
+function shareWhatsApp(){
+  const d = datos();
+  const faltan = FIS.filter(i=>estado[i]==='falta').map(i=>ETIQ[i]||i);
+  const malPres = PRES.filter(i=>estado[i]==='falta').map(i=>(ETIQ[i]||i)+': '+opsDe(i)[1][1].toLowerCase());
+  const sinMarcar = TODOS.filter(i=>!estado[i]).length;
+  const msg = `[INSPECCION-UNIDAD]
+Folio: ${d.folio}
+Unidad: ${d.unidad}
+Fecha: ${d.fecha} ${d.hora}
+Inspector: ${d.inspector}
+Operador: ${d.operador}
+Faltan: ${faltan.length?faltan.join(', '):'nada'}
+Presentación: ${malPres.length?malPres.join(', '):'bien'}${sinMarcar?`\nSin marcar: ${sinMarcar}`:''}
+${d.observaciones?'Observaciones: '+d.observaciones:''}`;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+
+function limpiarForm(conservarInspector){
+  const insp = document.getElementById('f-inspector').value;
+  estado = {};
+  document.getElementById('f-unidad').value = '';
+  document.getElementById('f-operador').value = '';
+  document.getElementById('f-inspector').value = conservarInspector ? insp : '';
+  document.getElementById('f-obs').value = '';
+  ['wrap-unidad','wrap-inspector','wrap-operador'].forEach(id=>document.getElementById(id).classList.remove('invalid'));
+  if(!conservarInspector) document.getElementById('status').className = 'status';
+  pintar(); setDefaultDate();
+}
+</script>
+</body>
+</html>
