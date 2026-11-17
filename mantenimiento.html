@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>Ohana — Reporte de Mantenimiento</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#252E50;--teal:#00B3B0;--bg:#f0f4f8;--white:#fff;
+  --green:#10b981;--yellow:#f59e0b;--red:#ef4444;--muted:#6b7280;
+  --border:#e2e8f0;--radius:14px;--shadow:0 2px 12px rgba(0,0,0,.10);
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:#1a202c;min-height:100vh}
+
+/* HEADER */
+header{background:var(--navy);padding:16px 20px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:50;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.logo-icon{width:40px;height:40px;background:var(--teal);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.logo-text{color:#fff}
+.logo-text .brand{font-size:15px;font-weight:700;letter-spacing:.08em}
+.logo-text .brand span{color:var(--teal)}
+.logo-text .sub{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.06em}
+.badge{margin-left:auto;background:rgba(0,179,176,.2);color:var(--teal);font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;white-space:nowrap}
+
+/* CONTENEDOR */
+.container{max-width:640px;margin:0 auto;padding:20px 16px 40px}
+
+/* CARDS */
+.card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden}
+.card-header{background:var(--navy);color:#fff;padding:14px 18px;font-size:13px;font-weight:700;letter-spacing:.04em;display:flex;align-items:center;gap:8px}
+.card-header .icon{font-size:16px}
+.card-body{padding:18px}
+
+/* CAMPOS */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.field .req{color:var(--red)}
+.field input,.field select,.field textarea{
+  width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:9px;
+  font-size:15px;font-family:inherit;outline:none;transition:border-color .2s;background:#fff
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--teal)}
+.field textarea{resize:vertical;min-height:80px}
+.field.invalid input,.field.invalid select,.field.invalid textarea{border-color:var(--red)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:400px){.row2{grid-template-columns:1fr}}
+
+/* PRIORIDAD (botones tipo chip) */
+.chip-group{display:flex;gap:10px}
+.chip{flex:1;padding:12px;border:1.5px solid var(--border);border-radius:9px;text-align:center;font-weight:700;font-size:14px;cursor:pointer;background:#fff;color:var(--muted)}
+.chip.active-normal{border-color:var(--teal);background:rgba(0,179,176,.12);color:var(--navy)}
+.chip.active-urgente{border-color:var(--red);background:rgba(239,68,68,.10);color:var(--red)}
+
+/* BOTONES */
+.btn-group{display:flex;flex-direction:column;gap:10px}
+.btn{width:100%;padding:15px 18px;border:none;border-radius:11px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-guardar{background:var(--green);color:#fff}
+.btn-guardar:hover{background:#0ea271}
+.btn-guardar:disabled{background:#9ca3af;cursor:not-allowed}
+.btn-whatsapp{background:#25d366;color:#fff}
+.btn-whatsapp:hover{background:#20b858}
+.btn-secondary{background:var(--white);color:var(--navy);border:1.5px solid var(--border)}
+.btn:active{transform:scale(.98)}
+
+/* STATUS */
+.status{display:none;padding:14px 16px;border-radius:11px;font-size:14px;font-weight:600;margin-bottom:14px;align-items:center;gap:8px}
+.status.show{display:flex}
+.status.ok{background:#d1fae5;color:#065f46}
+.status.err{background:#fee2e2;color:#991b1b}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-icon">🔧</div>
+  <div class="logo-text">
+    <div class="brand">OHANA <span>TRANSFERS</span></div>
+    <div class="sub">Reporte de Mantenimiento</div>
+  </div>
+  <div class="badge" id="badge-fecha">—</div>
+</header>
+
+<div class="container">
+
+  <div id="status" class="status"></div>
+
+  <!-- DATOS GENERALES -->
+  <div class="card">
+    <div class="card-header"><span class="icon">📋</span> Datos generales</div>
+    <div class="card-body">
+      <div class="row2">
+        <div class="field" id="wrap-unidad">
+          <label>Unidad <span class="req">*</span></label>
+          <select id="f-unidad">
+            <option value="">— Selecciona —</option>
+            <option>NU2</option>
+            <option>TH1</option>
+            <option>RMP8</option>
+            <option>FC3</option>
+            <option>JS4</option>
+            <option>FT5</option>
+            <option>NU6</option>
+            <option>FT7</option>
+            <option>FT8</option>
+            <option>FT9</option>
+          </select>
+        </div>
+        <div class="field" id="wrap-reporto">
+          <label>Reporta <span class="req">*</span></label>
+          <select id="f-reporto">
+            <option value="">— Selecciona —</option>
+            <option>CARLOS DOMINGUEZ</option>
+            <option>CARLOS PEREZ</option>
+            <option>HUGO MICHEL TREJO</option>
+            <option>JOSE JUAN ALVARADO</option>
+            <option>JUAN MANUEL LUGO HERNANDEZ</option>
+            <option>LUIS MIGUEL GARCES GUZMAN</option>
+            <option>OMAR PEREZ</option>
+            <option>OSCAR VAZQUEZ</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Fecha</label>
+        <input type="date" id="f-fecha"/>
+      </div>
+      <div class="field">
+        <label>Prioridad</label>
+        <div class="chip-group">
+          <div class="chip active-normal" id="chip-normal" onclick="setPrioridad('Normal')">Normal</div>
+          <div class="chip" id="chip-urgente" onclick="setPrioridad('Urgente')">Urgente</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROBLEMA -->
+  <div class="card">
+    <div class="card-header"><span class="icon">⚠️</span> Problema reportado</div>
+    <div class="card-body">
+      <div class="field" id="wrap-descripcion">
+        <label>Descripción del problema <span class="req">*</span></label>
+        <textarea id="f-descripcion" placeholder="Ej. Ruido en suspensión trasera al frenar"></textarea>
+      </div>
+      <div class="field">
+        <label>Notas adicionales (opcional)</label>
+        <textarea id="f-notas" placeholder="Cualquier detalle extra"></textarea>
+      </div>
+      <div class="field">
+        <label>Km actual (opcional)</label>
+        <input type="number" id="f-km" min="0" placeholder="0"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETALLES (opcionales, si ya se sabe) -->
+  <div class="card">
+    <div class="card-header"><span class="icon">🛠️</span> Detalles del mantenimiento (opcional)</div>
+    <div class="card-body">
+      <div class="row2">
+        <div class="field">
+          <label>Tipo</label>
+          <select id="f-tipo">
+            <option value="">— Selecciona —</option>
+            <option>Preventivo</option>
+            <option>Correctivo</option>
+            <option>Llantas</option>
+            <option>Frenos</option>
+            <option>Afinación</option>
+            <option>Carrocería</option>
+            <option>Eléctrico</option>
+            <option>Documentos</option>
+            <option>Otro</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Taller</label>
+          <input type="text" id="f-taller" placeholder="Ej. CDA Peninsula"/>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Pieza</label>
+          <input type="text" id="f-pieza" placeholder="Ej. Balatas delanteras"/>
+        </div>
+        <div class="field">
+          <label>Cantidad</label>
+          <input type="text" id="f-cantidad" placeholder="Ej. 2"/>
+        </div>
+      </div>
+      <div class="field">
+        <label>Costo ($)</label>
+        <input type="number" id="f-costo" step="0.01" min="0" placeholder="0.00"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACCIONES -->
+  <div class="btn-group">
+    <button class="btn btn-guardar" id="btn-guardar" onclick="guardarReporte()">
+      💾 Guardar reporte
+    </button>
+    <button class="btn btn-whatsapp" onclick="shareWhatsApp()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Aviso por WhatsApp (opcional)
+    </button>
+    <button class="btn btn-secondary" onclick="limpiarForm()">
+      🔄 Limpiar
+    </button>
+  </div>
+
+</div>
+
+<script>
+// Pega aquí la URL de tu Web App de Google Apps Script (la misma que usas
+// en el formulario de Combustible CSA — es el mismo proyecto de Apps Script,
+// solo cambia el campo "hoja" que le mandamos).
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwPDJVXKR_Dg6pqO0daeS5ZZ9BLVtW-UkqqZNmhzwJBcYuCjoUtG4YsJOVt55u5Nw7L/exec';
+
+let prioridad = 'Normal';
+
+document.addEventListener('DOMContentLoaded', () => {
+  setDefaultDate();
+});
+
+function setDefaultDate() {
+  const today = new Date();
+  // Fecha local del teléfono (Cancún). toISOString() da la fecha en UTC y
+  // después de las 19:00 ya marcaba el día siguiente.
+  const p2 = n => String(n).padStart(2,'0');
+  document.getElementById('f-fecha').value = `${today.getFullYear()}-${p2(today.getMonth()+1)}-${p2(today.getDate())}`;
+  document.getElementById('badge-fecha').textContent = today.toLocaleDateString('es-MX',{day:'numeric',month:'short'});
+}
+
+function setPrioridad(p) {
+  prioridad = p;
+  document.getElementById('chip-normal').className  = 'chip' + (p==='Normal'  ? ' active-normal'  : '');
+  document.getElementById('chip-urgente').className = 'chip' + (p==='Urgente' ? ' active-urgente' : '');
+}
+
+function datosFormulario() {
+  const unidad      = document.getElementById('f-unidad').value || '';
+  const reporto     = document.getElementById('f-reporto').value || '';
+  const fecha       = document.getElementById('f-fecha').value || '';
+  const descripcion = document.getElementById('f-descripcion').value.trim();
+  const notas       = document.getElementById('f-notas').value.trim();
+  const km          = document.getElementById('f-km').value || '';
+  const tipo        = document.getElementById('f-tipo').value || '';
+  const taller      = document.getElementById('f-taller').value.trim();
+  const pieza       = document.getElementById('f-pieza').value.trim();
+  const cantidad    = document.getElementById('f-cantidad').value.trim();
+  const costo       = document.getElementById('f-costo').value || '';
+
+  const fp = fecha ? fecha.split('-') : ['','',''];
+  const fechaFmt = fecha ? (fp[2] + '/' + fp[1] + '/' + fp[0]) : '';
+  const now = new Date();
+  const folio = `MANT-${fp[0]}${fp[1]}${fp[2]}-${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
+
+  return {
+    hoja: 'mantenimiento', folio, fecha: fechaFmt, unidad, reporto, prioridad,
+    descripcion, notas, kmActual: km, tipo, taller, pieza, cantidad, costo
+  };
+}
+
+function validar(d) {
+  const faltantes = [];
+  const marcar = (id, wrapId, val) => {
+    const wrap = document.getElementById(wrapId);
+    if (!val) { wrap.classList.add('invalid'); faltantes.push(id); }
+    else wrap.classList.remove('invalid');
+  };
+  marcar('unidad', 'wrap-unidad', d.unidad);
+  marcar('reporta', 'wrap-reporto', d.reporto);
+  marcar('descripción', 'wrap-descripcion', d.descripcion);
+  return faltantes;
+}
+
+function mostrarStatus(tipo, msg) {
+  const el = document.getElementById('status');
+  el.className = 'status show ' + tipo;
+  el.textContent = msg;
+}
+
+async function guardarReporte() {
+  const d = datosFormulario();
+  const faltantes = validar(d);
+  if (faltantes.length) {
+    mostrarStatus('err', '⚠️ Falta: ' + faltantes.join(', '));
+    return;
+  }
+  if (SHEETS_URL.indexOf('PON_AQUI') === 0) {
+    mostrarStatus('err', '⚠️ Falta configurar la URL de Google Sheets en el código.');
+    return;
+  }
+  const btn = document.getElementById('btn-guardar');
+  btn.disabled = true;
+  btn.textContent = 'Guardando…';
+  try {
+    // mode:'no-cors': no podemos confirmar el guardado en el servidor, solo
+    // que la petición salió. El botón de WhatsApp queda como respaldo.
+    await fetch(SHEETS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify(d)
+    });
+    mostrarStatus('ok', '✅ Reporte guardado: ' + d.unidad + ' — ' + d.prioridad);
+    setTimeout(() => { limpiarForm(); }, 1200);
+  } catch (err) {
+    mostrarStatus('err', '❌ No se pudo guardar (sin conexión). Intenta de nuevo o usa el aviso por WhatsApp.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '💾 Guardar reporte';
+  }
+}
+
+function shareWhatsApp() {
+  const d = datosFormulario();
+  const msg = `[MANTENIMIENTO-REPORTE]
+Folio: ${d.folio}
+Unidad: ${d.unidad}
+Reporta: ${d.reporto}
+Fecha: ${d.fecha}
+Prioridad: ${d.prioridad}
+Tipo: ${d.tipo || '-'}
+Taller: ${d.taller || '-'}
+Pieza: ${d.pieza || '-'}
+Cantidad: ${d.cantidad || '-'}
+Costo: ${d.costo || '-'}
+Descripcion: ${d.descripcion}
+Notas: ${d.notas || '-'}
+Km actual: ${d.kmActual || '-'}`;
+
+  const url = 'https://wa.me/?text=' + encodeURIComponent(msg);
+  window.open(url, '_blank');
+}
+
+function limpiarForm() {
+  document.getElementById('f-unidad').value = '';
+  document.getElementById('f-reporto').value = '';
+  document.getElementById('f-descripcion').value = '';
+  document.getElementById('f-notas').value = '';
+  document.getElementById('f-km').value = '';
+  document.getElementById('f-tipo').value = '';
+  document.getElementById('f-taller').value = '';
+  document.getElementById('f-pieza').value = '';
+  document.getElementById('f-cantidad').value = '';
+  document.getElementById('f-costo').value = '';
+  document.getElementById('status').className = 'status';
+  setPrioridad('Normal');
+  ['wrap-unidad','wrap-reporto','wrap-descripcion'].forEach(id=>document.getElementById(id).classList.remove('invalid'));
+  setDefaultDate();
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
